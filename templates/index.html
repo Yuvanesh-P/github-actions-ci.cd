@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TaskFlow | Project Dashboard</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="logo">T</span><span>TaskFlow<small>PROJECT WORKSPACE</small></span></a>
+  <span class="env">● DEVELOPMENT</span>
+</header>
+<main class="container">
+  <section class="welcome">
+    <div><p class="eyebrow">WORKSPACE / OVERVIEW</p>
+    <h1>Project dashboard</h1>
+    <p class="muted">Organize work, track progress, and keep your team moving.</p></div>
+    <a class="button primary" href="#new-task">+ Create task</a>
+  </section>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="notice {{ category }}">{{ message }}</div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+  <section class="stats">
+    <article class="stat"><span>Total tasks</span><strong>{{ stats.total }}</strong><small>All workspace tasks</small></article>
+    <article class="stat"><span>To do</span><strong>{{ stats.todo }}</strong><small>Waiting to start</small></article>
+    <article class="stat"><span>In progress</span><strong>{{ stats.progress }}</strong><small>Currently underway</small></article>
+    <article class="stat"><span>Completed</span><strong>{{ stats.done }}</strong><small>Successfully finished</small></article>
+  </section>
+
+  <section class="panel" id="new-task">
+    <h2>Create a task</h2>
+    <p class="muted intro">Add work to your project board.</p>
+    <form action="/tasks" method="post" class="task-form">
+      <label class="full">Task title<input name="title" maxlength="120" placeholder="Configure CI/CD pipeline" required></label>
+      <label class="full">Description<textarea name="description" maxlength="1000" rows="2" placeholder="What needs to be done?"></textarea></label>
+      <label>Priority<select name="priority">{% for p in priorities %}<option value="{{ p }}">{{ p }}</option>{% endfor %}</select></label>
+      <label>Due date<input type="date" name="due_date"></label>
+      <div class="form-action"><button class="button primary">Add task</button></div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Task board</h2>
+    <p class="muted intro">{{ tasks|length }} task(s) match your filters.</p>
+    <form class="filters" method="get">
+      <input name="q" value="{{ search }}" placeholder="Search tasks...">
+      <select name="status"><option value="All">All statuses</option>{% for s in statuses %}<option value="{{ s }}" {% if selected_status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select>
+      <select name="priority"><option value="All">All priorities</option>{% for p in priorities %}<option value="{{ p }}" {% if selected_priority == p %}selected{% endif %}>{{ p }}</option>{% endfor %}</select>
+      <button class="button secondary">Filter</button><a class="clear" href="/">Clear</a>
+    </form>
+
+    {% if tasks %}
+    <div class="task-list">
+      {% for task in tasks %}
+      <article class="task">
+        <div class="task-main">
+          <div class="task-title"><h3 class="{% if task.status == 'Done' %}completed{% endif %}">{{ task.title }}</h3><span class="priority {{ task.priority|lower }}">{{ task.priority }}</span></div>
+          {% if task.description %}<p class="description">{{ task.description }}</p>{% endif %}
+          <div class="meta"><span class="status status-{{ task.status|lower|replace(' ', '-') }}">{{ task.status }}</span>{% if task.due_date %}<span>Due {{ task.due_date }}</span>{% endif %}<span>Task #{{ task.id }}</span></div>
+        </div>
+        <div class="actions">
+          <form action="/tasks/{{ task.id }}/status" method="post"><select name="status">{% for s in statuses %}<option value="{{ s }}" {% if task.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select><button class="button secondary small">Update</button></form>
+          <form action="/tasks/{{ task.id }}/delete" method="post" onsubmit="return confirm('Delete this task?')"><button class="button danger small">Delete</button></form>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty"><span class="empty-icon">✓</span><h3>No tasks found</h3><p class="muted">Create a task or change your filters.</p></div>
+    {% endif %}
+  </section>
+  <footer>TaskFlow · Flask application · CI/CD practice project</footer>
+</main>
+</body>
+</html>
