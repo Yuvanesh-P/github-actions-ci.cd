@@ -1,4 +1,3 @@
-
 name: TaskFlow CI Pipeline
 
 on:
@@ -40,9 +39,13 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     environment: dev
+
     steps:
-      - name: Confirm Dev stage
-        run: echo "Dev checks passed. Actual Azure deployment will be configured later."
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Confirm Dev pipeline
+        run: echo "Build and tests passed. Dev deployment will be configured next."
 
   deploy-qa:
     name: QA Deployment
@@ -50,9 +53,13 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
     runs-on: ubuntu-latest
     environment: qa
+
     steps:
-      - name: Confirm QA stage
-        run: echo "QA checks passed. Actual Azure deployment will be configured later."
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Confirm QA pipeline
+        run: echo "Build and tests passed. QA deployment will be configured next."
 
   deploy-prod:
     name: Production Deployment
@@ -60,6 +67,10 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: prod
+
     steps:
-      - name: Confirm Production stage
-        run: echo "Production checks passed. Actual Azure deployment will be configured later."
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Confirm Production pipeline
+        run: echo "Build and tests passed. Production deployment will be configured next."
